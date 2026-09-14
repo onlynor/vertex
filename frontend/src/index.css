@@ -1,0 +1,275 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink-950: #0a1628;
+  --color-ink-900: #0d1f3c;
+  --color-ink-800: #132a4f;
+  --color-ink-700: #1c3a68;
+
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  background: #f5f6f8;
+  color: #1d1d1f;
+  font-family: var(--font-sans);
+  letter-spacing: -0.011em;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+/* 苹果风格的标题字间距收紧处理 */
+.display-tight {
+  letter-spacing: -0.028em;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 用 backwards 而不是 both：动画结束后不保留 transform。保留的话卡片会成为
+   position: fixed 子元素的定位参照，手机上的底部面板就不再贴着屏幕底部。 */
+.animate-fade-up {
+  animation: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* 足球动画：球弹跳，落地时阴影被压扁 */
+@keyframes ball-bounce {
+  0%,
+  100% {
+    transform: translateY(-28px) rotate(0deg);
+    animation-timing-function: cubic-bezier(0.6, 0.05, 0.9, 0.5);
+  }
+  50% {
+    transform: translateY(0) rotate(180deg);
+    animation-timing-function: cubic-bezier(0.1, 0.6, 0.4, 1);
+  }
+}
+
+.ball-bounce {
+  animation: ball-bounce 0.9s infinite;
+}
+
+@keyframes ball-shadow {
+  0%,
+  100% {
+    transform: scaleX(0.6);
+    opacity: 0.25;
+  }
+  50% {
+    transform: scaleX(1.1);
+    opacity: 0.7;
+  }
+}
+
+.ball-shadow {
+  animation: ball-shadow 0.9s infinite;
+}
+
+@keyframes spin-ball {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin-ball {
+  animation: spin-ball 2.6s linear infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  animation: shimmer 1.6s infinite;
+}
+
+/* 功能星图与数据大屏的动效 */
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+.twinkle {
+  animation: twinkle 3.2s ease-in-out infinite;
+}
+
+@keyframes galaxy-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+.galaxy-pulse {
+  animation: galaxy-pulse 2.8s ease-out infinite;
+}
+
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -56;
+  }
+}
+
+.dash-flow {
+  animation: dash-flow 2.4s linear infinite;
+}
+
+@keyframes orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.orbit {
+  animation: orbit 60s linear infinite;
+}
+
+.spin-slow {
+  animation: spin-ball 24s linear infinite;
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.float-y {
+  animation: float-y 4.5s ease-in-out infinite;
+}
+
+@keyframes ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker {
+  animation: ticker 60s linear infinite;
+}
+
+.ticker:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .twinkle,
+  .galaxy-pulse,
+  .dash-flow,
+  .orbit,
+  .spin-slow,
+  .float-y,
+  .ticker,
+  .ball-bounce,
+  .ball-shadow {
+    animation: none !important;
+  }
+}
+
+/*
+ * 导出 PDF：点击「导出 PDF」时把排好版的文档挂到 body 下的 .print-root，
+ * 打印时只显示它、隐藏整个应用；屏幕上它始终不可见。
+ */
+.print-root {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  html.printing body {
+    background: #fff;
+  }
+
+  html.printing body > *:not(.print-root) {
+    display: none !important;
+  }
+
+  html.printing .print-root {
+    display: block;
+    color: #1d1d1f;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print-root .print-avoid-break,
+  .print-root tr {
+    break-inside: avoid;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.16);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.28);
+  background-clip: content-box;
+}

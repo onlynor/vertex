@@ -1,0 +1,81 @@
+# 一条命令把整套系统跑起来：MySQL + 后端（自带 ffmpeg）+ 前端（Nginx）。
+#   cp .env.example .env   # 填好 API Key、数据库密码、APP_SECRET
+#   docker compose up -d --build
+# 打开 http://服务器地址/ ，用 .env 里的管理员账号登录。
+name: vertex
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: vertex-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?请先在 .env 中设置 DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME:-football_ai}
+      TZ: ${TZ:-Asia/Shanghai}
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${DB_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: vertex-backend
+    environment:
+      # AI 模型配置只作为首次启动的兜底，登录后在「设置」页改，之后以数据库里的加密配置为准。
+      API_KEY: ${API_KEY}
+      base_url: ${base_url}
+      model: ${model}
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-football_ai}
+      APP_SECRET: ${APP_SECRET:?请先在 .env 中设置 APP_SECRET}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      VIDEO_STORE_DIR: /app/data/videos
+      VIDEO_STORE_MAX_GB: ${VIDEO_STORE_MAX_GB:-20}
+      VIDEO_TMP_DIR: /app/tmp
+      PORT: 8080
+      # 评价表、训练报告都按日期统计，时区要和学校一致。
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      # 训练视频保存在这里供回放，容器重建不会丢。
+      - video_data:/app/data/videos
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: vertex-web
+    ports:
+      # WEB_HOST 留空即 0.0.0.0（外网直接可访问）；反代场景把 .env 里的 WEB_HOST 设成
+      # 127.0.0.1，让这个端口只有本机能连到，外部请求全部经过反代转发。
+      - "${WEB_HOST:-0.0.0.0}:${WEB_PORT:-80}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  video_data:
