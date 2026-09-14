@@ -24,7 +24,13 @@ services:
     restart: unless-stopped
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      # 构建时用的下载源，默认国内镜像；海外服务器可以在 .env 里覆盖成官方源。
+      args:
+        GOPROXY: ${GOPROXY:-https://goproxy.cn,https://proxy.golang.com.cn,direct}
+        GOSUMDB: ${GOSUMDB:-sum.golang.google.cn}
+        APK_MIRROR: ${APK_MIRROR:-mirrors.aliyun.com}
     container_name: vertex-backend
     environment:
       # AI 模型配置只作为首次启动的兜底，登录后在「设置」页改，之后以数据库里的加密配置为准。
@@ -60,7 +66,10 @@ services:
     restart: unless-stopped
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmmirror.com/}
     container_name: vertex-web
     ports:
       # WEB_HOST 留空即 0.0.0.0（外网直接可访问）；反代场景把 .env 里的 WEB_HOST 设成

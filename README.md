@@ -70,6 +70,8 @@ docker compose ps         # 三个服务都是 healthy 就绪
 
 打开 `http://服务器地址/`，用 `.env` 里的管理员账号登录。
 
+> 构建镜像时默认走国内镜像源（Go 模块用 `goproxy.cn`、Alpine 包用阿里云、npm 包用 `npmmirror.com`），国内服务器构建更快更稳；海外服务器改用官方源见下文「构建镜像的下载源」。
+
 | 常用命令 | 作用 |
 |---|---|
 | `docker compose logs -f backend` | 看后端日志（分析失败、AI 报错都在这里） |
@@ -86,6 +88,21 @@ docker compose ps         # 三个服务都是 healthy 就绪
 - 后端健康检查是 `GET /api/health`（公开接口，会 ping 一次数据库），前端等后端 healthy 之后才启动
 
 > 这套编排还**没有在本机实测**（开发机没装 Docker），构建和启动如果报错请把日志发出来。
+
+### 构建镜像的下载源
+
+`docker compose build` 默认走国内镜像下载依赖：
+
+| 下载什么 | 默认（国内镜像） | 海外服务器改成 |
+|---|---|---|
+| Go 模块 `GOPROXY` | `goproxy.cn`（备用 `proxy.golang.com.cn`） | `https://proxy.golang.org` |
+| Go 校验和 `GOSUMDB` | `sum.golang.google.cn` | `sum.golang.org` |
+| Alpine 系统包 `APK_MIRROR` | `mirrors.aliyun.com` | `dl-cdn.alpinelinux.org` |
+| npm 包 `NPM_REGISTRY` | `registry.npmmirror.com` | `https://registry.npmjs.org` |
+
+不在国内网络时，在 `.env` 里改成上表右列对应的值（`.env.example` 里已经写好这几行），再 `docker compose build` 重新构建即可，不用改 Dockerfile。`frontend/bun.lock` 按包名和版本号记录完整性哈希、不绑定具体源地址，换源不影响装到的版本。
+
+`ffmpeg` 依赖上百个编解码库，第一次构建装这层要几分钟；这层在 `COPY` 源码之前，日常 `git pull` 改代码后重新构建本来就会走 Docker 的层缓存跳过它，不会每次都等。两个 Dockerfile 都用了 BuildKit 的 `--mount=type=cache`，把下载过的包缓存单独存在构建缓存里（不占镜像体积），即使触发这几层重建（换了基础镜像、改了这几行、或者 `--no-cache` 全量重建）也不用重新下载一遍——前提是 Docker 版本较新（22.06+ 默认已启用 BuildKit，一般不用另外配置）。
 
 ### 配合反代（Nginx / Caddy 等）
 
@@ -145,6 +162,7 @@ server {
 | `VIDEO_TMP_DIR` / `PORT` | `./tmp` / `8080` | 抽帧临时目录、后端端口 |
 | `WEB_PORT` | `80` | 仅 docker compose：网站对外端口 |
 | `WEB_HOST` | `0.0.0.0` | 仅 docker compose：监听地址，配合反代时改成 `127.0.0.1` |
+| `GOPROXY` / `GOSUMDB` / `APK_MIRROR` / `NPM_REGISTRY` | 国内镜像 | 仅构建镜像时用，见「构建镜像的下载源」 |
 | `TZ` | `Asia/Shanghai` | 仅 docker compose：时区，影响按日期的统计 |
 
 > ⚠️ **`APP_SECRET` 换掉后已存的报告、封面图和 API Key 将无法解密**，它们用这个密钥派生的 AES-256-GCM 加密存储。
