@@ -1,2 +1,16 @@
+# 真实配置：API Key、数据库密码、APP_SECRET（加密主密钥）都在这里，
+# 任何 .env 变体都不能提交；.env.example 是占位模板，单独放行。
 .env
+.env.*
+!.env.example
+
+# 内部方案文档，不对外公开
 design_doc/
+
+# 常见密钥/证书文件，防止之后误加进来
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+id_rsa*
