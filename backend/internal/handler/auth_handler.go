@@ -11,17 +11,32 @@ import (
 )
 
 type AuthHandler struct {
-	db   *gorm.DB
-	auth *auth.Service
+	db          *gorm.DB
+	auth        *auth.Service
+	appPassword string
 }
 
-func NewAuthHandler(db *gorm.DB, authSvc *auth.Service) *AuthHandler {
-	return &AuthHandler{db: db, auth: authSvc}
+func NewAuthHandler(db *gorm.DB, authSvc *auth.Service, appPassword string) *AuthHandler {
+	return &AuthHandler{db: db, auth: authSvc, appPassword: appPassword}
+}
+
+// checkAccessPassword 校验登录/注册前的访问口令。APP_PASSWORD 未配置时直接放行，
+// 这样本地开发和还没配置这项的部署不受影响。
+func (h *AuthHandler) checkAccessPassword(c *gin.Context, provided string) bool {
+	if h.appPassword == "" {
+		return true
+	}
+	if provided != h.appPassword {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "访问密码不正确，请向管理员获取"})
+		return false
+	}
+	return true
 }
 
 type loginRequest struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Username       string `json:"username" binding:"required"`
+	Password       string `json:"password" binding:"required"`
+	AccessPassword string `json:"access_password"`
 }
 
 // Login 处理 POST /api/auth/login 接口。
@@ -29,6 +44,9 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	var req loginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "请填写用户名和密码"})
+		return
+	}
+	if !h.checkAccessPassword(c, req.AccessPassword) {
 		return
 	}
 

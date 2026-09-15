@@ -24,9 +24,10 @@ var (
 )
 
 type registerRequest struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
-	Name     string `json:"name"`
+	Username       string `json:"username" binding:"required"`
+	Password       string `json:"password" binding:"required"`
+	Name           string `json:"name"`
+	AccessPassword string `json:"access_password"`
 }
 
 // Register 处理 POST /api/auth/register 接口。因为该接口是公开的，
@@ -35,6 +36,11 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	var req registerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "请填写用户名和密码"})
+		return
+	}
+	// 访问口令放在其他校验之前：没有口令的人不该借助用户名规则的报错
+	// 探测出哪些用户名已经被占用。
+	if !h.checkAccessPassword(c, req.AccessPassword) {
 		return
 	}
 

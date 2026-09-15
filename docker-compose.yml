@@ -45,6 +45,7 @@ services:
       APP_SECRET: ${APP_SECRET:?请先在 .env 中设置 APP_SECRET}
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      APP_PASSWORD: ${APP_PASSWORD:-}
       VIDEO_STORE_DIR: /app/data/videos
       VIDEO_STORE_MAX_GB: ${VIDEO_STORE_MAX_GB:-20}
       VIDEO_TMP_DIR: /app/tmp

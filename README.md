@@ -157,6 +157,7 @@ server {
 | `DB_HOST` / `DB_PORT` / `DB_NAME` | `127.0.0.1` / `3306` / `football_ai` | MySQL 连接 |
 | `APP_SECRET` | **必填** | JWT 签名 + 字段加密主密钥 |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | `admin` / `admin123` | 初始管理员账号 |
+| `APP_PASSWORD` | 留空（不校验） | 登录/注册前的访问口令，防止陌生人恶意注册、刷量 |
 | `VIDEO_STORE_DIR` | `./data/videos` | 视频保存目录 |
 | `VIDEO_STORE_MAX_GB` | `20` | 视频保留上限，超出按最旧淘汰 |
 | `VIDEO_TMP_DIR` / `PORT` | `./tmp` / `8080` | 抽帧临时目录、后端端口 |

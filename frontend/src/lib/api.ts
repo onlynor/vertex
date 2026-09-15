@@ -70,16 +70,16 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
-  login: (username: string, password: string) =>
+  login: (username: string, password: string, accessPassword: string) =>
     request<{ token: string; teacher: Teacher }>("/auth/login", {
       method: "POST",
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username, password, access_password: accessPassword }),
     }),
 
-  register: (username: string, password: string, name: string) =>
+  register: (username: string, password: string, name: string, accessPassword: string) =>
     request<{ token: string; teacher: Teacher }>("/auth/register", {
       method: "POST",
-      body: JSON.stringify({ username, password, name }),
+      body: JSON.stringify({ username, password, name, access_password: accessPassword }),
     }),
 
   me: () => request<Teacher>("/auth/me"),

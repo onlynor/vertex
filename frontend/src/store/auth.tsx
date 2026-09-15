@@ -13,8 +13,8 @@ import type { Teacher } from "../types";
 interface AuthState {
   teacher: Teacher | null;
   loading: boolean;
-  login: (username: string, password: string) => Promise<void>;
-  register: (username: string, password: string, name: string) => Promise<void>;
+  login: (username: string, password: string, accessPassword: string) => Promise<void>;
+  register: (username: string, password: string, name: string, accessPassword: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -36,17 +36,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const login = useCallback(async (username: string, password: string) => {
-    const res = await api.login(username, password);
+  const login = useCallback(async (username: string, password: string, accessPassword: string) => {
+    const res = await api.login(username, password, accessPassword);
     setToken(res.token);
     setTeacher(res.teacher);
   }, []);
 
-  const register = useCallback(async (username: string, password: string, name: string) => {
-    const res = await api.register(username, password, name);
-    setToken(res.token);
-    setTeacher(res.teacher);
-  }, []);
+  const register = useCallback(
+    async (username: string, password: string, name: string, accessPassword: string) => {
+      const res = await api.register(username, password, name, accessPassword);
+      setToken(res.token);
+      setTeacher(res.teacher);
+    },
+    [],
+  );
 
   const logout = useCallback(() => {
     clearToken();

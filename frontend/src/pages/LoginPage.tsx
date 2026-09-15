@@ -34,6 +34,7 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [accessPassword, setAccessPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -63,9 +64,9 @@ export default function LoginPage() {
     setError(null);
     try {
       if (isRegister) {
-        await register(username, password, name);
+        await register(username, password, name, accessPassword);
       } else {
-        await login(username, password);
+        await login(username, password, accessPassword);
       }
       navigate("/");
     } catch (err) {
@@ -127,6 +128,14 @@ export default function LoginPage() {
                 </p>
 
                 <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+                  <Input
+                    label="访问密码"
+                    type="password"
+                    placeholder="向管理员获取"
+                    value={accessPassword}
+                    onChange={(e) => setAccessPassword(e.target.value)}
+                    autoComplete="off"
+                  />
                   <Input
                     label="用户名"
                     placeholder={isRegister ? "6~12 位字母或数字" : "请输入用户名"}

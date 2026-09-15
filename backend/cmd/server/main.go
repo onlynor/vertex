@@ -60,6 +60,10 @@ func main() {
 		port = "8080"
 	}
 
+	// 教师登录/注册前需要先输入的访问口令，用来挡掉互联网上的恶意注册/刷量；
+	// 不设置就不做这层校验，方便本地开发。
+	appPassword := os.Getenv("APP_PASSWORD")
+
 	authSvc := auth.NewService(secret)
 	settingsSvc := settings.NewService(gormDB, cipher)
 	analyzer := ai.NewOpenAICompatAnalyzer(func() (ai.Config, error) {
@@ -69,7 +73,7 @@ func main() {
 	videoStore := video.NewStore(videoDir, int64(storeMaxGB*1024*1024*1024))
 	analysisSvc := service.NewAnalysis(gormDB, analyzer, cipher, videoStore, tmpDir, 3)
 
-	authHandler := handler.NewAuthHandler(gormDB, authSvc)
+	authHandler := handler.NewAuthHandler(gormDB, authSvc, appPassword)
 	studentHandler := handler.NewStudentHandler(gormDB)
 	videoHandler := handler.NewVideoHandler(gormDB, analysisSvc, videoStore)
 	statsHandler := handler.NewStatsHandler(gormDB, analysisSvc)
