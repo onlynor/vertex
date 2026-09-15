@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import ballImage from "../assets/ball.png";
+import ballImage from "../assets/ball.webp";
 import { SoccerBall } from "../components/Football";
 import { IconArrowLeft, IconExpand } from "../components/Icons";
 import { Spinner } from "../components/ui";

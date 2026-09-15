@@ -68,7 +68,7 @@ docker compose up -d --build
 docker compose ps         # 三个服务都是 healthy 就绪
 ```
 
-打开 `http://服务器地址/`，用 `.env` 里的管理员账号登录。
+打开 `http://服务器地址:8080/`，用 `.env` 里的管理员账号登录。
 
 > 构建镜像时默认走国内镜像源（Go 模块用 `goproxy.cn`、Alpine 包用阿里云、npm 包用 `npmmirror.com`），国内服务器构建更快更稳；海外服务器改用官方源见下文「构建镜像的下载源」。
 
@@ -80,14 +80,14 @@ docker compose ps         # 三个服务都是 healthy 就绪
 | `docker compose down` | 停止（数据保留在数据卷里） |
 | `docker compose down -v` | 停止并**删除数据库和视频**，谨慎 |
 
-- 80 端口被占用就在 `.env` 里改 `WEB_PORT=8000`，访问 `http://服务器地址:8000/`
+- 默认对外端口是 `8080`（避开很多机器上已经占了 80 端口的系统级 nginx）；要换成别的端口就在 `.env` 里改 `WEB_PORT`，再访问 `http://服务器地址:改成的端口/`
 - `TZ` 默认 `Asia/Shanghai`：评价表、训练报告按本地日期统计，时区不对日期会错一天
 - 数据放在两个数据卷里：`vertex_mysql_data`（数据库）、`vertex_video_data`（训练视频），容器重建不会丢
 - 备份数据库：`docker compose exec mysql mysqldump -uroot -p"$DB_PASSWORD" football_ai > backup.sql`
 - ffmpeg 已经装在后端镜像里，宿主机不用另外装
 - 后端健康检查是 `GET /api/health`（公开接口，会 ping 一次数据库），前端等后端 healthy 之后才启动
 
-> 这套编排还**没有在本机实测**（开发机没装 Docker），构建和启动如果报错请把日志发出来。
+> 这套编排已经在本机用真实 Docker 环境跑通验证过（三个服务健康、上传视频能存能放能出报告），构建和启动如果报错还是把日志发出来。
 
 ### 构建镜像的下载源
 
@@ -111,7 +111,7 @@ docker compose ps         # 三个服务都是 healthy 就绪
 ```bash
 # .env
 WEB_HOST=127.0.0.1
-WEB_PORT=8000        # 随便选一个没被占用的端口，反代转发到这里
+WEB_PORT=8080        # 随便选一个没被占用的端口，反代转发到这里
 ```
 
 ```bash
@@ -160,7 +160,7 @@ server {
 | `VIDEO_STORE_DIR` | `./data/videos` | 视频保存目录 |
 | `VIDEO_STORE_MAX_GB` | `20` | 视频保留上限，超出按最旧淘汰 |
 | `VIDEO_TMP_DIR` / `PORT` | `./tmp` / `8080` | 抽帧临时目录、后端端口 |
-| `WEB_PORT` | `80` | 仅 docker compose：网站对外端口 |
+| `WEB_PORT` | `8080` | 仅 docker compose：网站对外端口 |
 | `WEB_HOST` | `0.0.0.0` | 仅 docker compose：监听地址，配合反代时改成 `127.0.0.1` |
 | `GOPROXY` / `GOSUMDB` / `APK_MIRROR` / `NPM_REGISTRY` | 国内镜像 | 仅构建镜像时用，见「构建镜像的下载源」 |
 | `TZ` | `Asia/Shanghai` | 仅 docker compose：时区，影响按日期的统计 |

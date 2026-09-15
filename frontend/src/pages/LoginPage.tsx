@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import pitchPhoto from "../assets/pitch.jpg";
+import pitchPhoto from "../assets/pitch.webp";
 import { BRAND, BrandLockup } from "../components/Brand";
 import { NetPattern, SoccerBall } from "../components/Football";
 import { IconReport, IconSpark, IconVideo } from "../components/Icons";

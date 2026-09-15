@@ -1,4 +1,4 @@
-import ballImage from "../assets/ball.png";
+import ballImage from "../assets/ball.webp";
 
 /**
  * 足球视觉组件集。足球图片使用品牌自带的素材；其余图形全部为内联 SVG，

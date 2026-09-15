@@ -1,7 +1,7 @@
 # 一条命令把整套系统跑起来：MySQL + 后端（自带 ffmpeg）+ 前端（Nginx）。
 #   cp .env.example .env   # 填好 API Key、数据库密码、APP_SECRET
 #   docker compose up -d --build
-# 打开 http://服务器地址/ ，用 .env 里的管理员账号登录。
+# 打开 http://服务器地址:8080/ ，用 .env 里的管理员账号登录。
 name: vertex
 
 services:
@@ -74,7 +74,7 @@ services:
     ports:
       # WEB_HOST 留空即 0.0.0.0（外网直接可访问）；反代场景把 .env 里的 WEB_HOST 设成
       # 127.0.0.1，让这个端口只有本机能连到，外部请求全部经过反代转发。
-      - "${WEB_HOST:-0.0.0.0}:${WEB_PORT:-80}:80"
+      - "${WEB_HOST:-0.0.0.0}:${WEB_PORT:-8080}:80"
     depends_on:
       backend:
         condition: service_healthy

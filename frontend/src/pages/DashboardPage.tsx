@@ -10,7 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import pitchPhoto from "../assets/pitch.jpg";
+import pitchPhoto from "../assets/pitch.webp";
 import { BRAND } from "../components/Brand";
 import FeatureGalaxy from "../components/FeatureGalaxy";
 import { NetPattern, SoccerBall } from "../components/Football";
